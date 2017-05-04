@@ -5,7 +5,7 @@
 
 using namespace std;
  
-#define V 250
+#define V 1000
 const double EulerConstant = std::exp(1.0);
 
 string type;
@@ -86,21 +86,46 @@ void dijkstra(int graph[V][V], int src)
 //MAX CASE
 int fitness(vector<int> s){
 	int cost = 0;
+	int i = 0;
 
-	for(int i=0; i<N-1;i++){
-		cost += Graph[s[i]][s[i+1]];
+	if(s[0] != -1){
+		cost += Graph[start][s[i]];
+
+		// cout << "fit " << i << endl;
+		while(s[i+1] != -1){
+			// if(s[i] >=N || s[i+1] >= N){
+			// 	cout << s[i] << " | " << s[i+1] << " | " << i << " | " << N << endl;
+
+			// 	for(int j=0;j<N;j++){
+			// 		cout << s[j] << " ";
+			// 	}
+			// 	cout << endl;
+
+			// }
+			cost += Graph[s[i]][s[i+1]];
+			i++;
+		}
+		// cout << "fit " << i << " end" << endl;
+
+		cost += Graph[s[i]][endd];
+	}else{
+		cost += Graph[start][endd];
 	}
 
-	if(s[0] != start) cost -= INFINITY;
-	if(s[N-1] != endd) cost -= INFINITY;
+	// cout << "fit " << i << " end cost" << endl;
 
 	return cost;
 }
 
 void initSolution(){
+	int tmp;
+
 	for(int i=0; i<N;i++){
-		solution.push_back(i);
+		if(i != start && i != endd){
+			solution.push_back(i);
+		}
 	}
+	solution.push_back(-1);
 }
 
 void swap(){
@@ -108,7 +133,7 @@ void swap(){
 
 	random_device rd;     // only used once to initialise (seed) engine
 	mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-	uniform_int_distribution<int> uni(0,N-1); // guaranteed unbiased
+	uniform_int_distribution<int> uni(0,N-2); // guaranteed unbiased
 
 	currentSolution = solution;
 
@@ -120,18 +145,22 @@ void swap(){
 		j = uni(rng);
 	}
 
+	// cout << "a = " << i << endl;
 	int tmp = currentSolution[i];
+	// cout << "b = " << i << " | " << j << endl;
 	currentSolution[i] = currentSolution[j];
+	// cout << "c = " << j << endl;
 	currentSolution[j] = tmp;
+	// cout << "d" << endl;
 }
 
 void SA(){
 
 	int nIter = 0;
-	int maxIter = 1000;
-	double T = 1;
+	int maxIter = 100000;
+	double T = 3;
 	int delta;
-	double alfa = 0.90;
+	double alfa = 0.99;
 	double x;
 	int sg, sm, ss;
 
@@ -179,7 +208,17 @@ void SA(){
 				}
 			}
 			perc = (accepted*100)/nIter;
-			cout << "It: " << itTotal << "; Temp: " << T << "; BestFitness: "<<sm << endl;
+			cout << "It: " << itTotal << "; Temp: " << T << "; BestFitness: "<<sm << "; Current: " << sg << endl;
+
+			// cout << N << " ( " << start << " ";
+	
+			// int i = 0;	
+			// while(currentSolution[i] != -1){
+			// 	cout << currentSolution[i] << " ";
+			// 	i++;
+			// }
+			
+			// cout << endd << " ) " << sg << endl << endl;
 		}
 
 		T = T * alfa;
@@ -187,13 +226,15 @@ void SA(){
 		nIter = 0;
 	}
 
-	cout << N << " (";
+	cout << N << " ( " << start << " ";
 	
-	for(int i = 0; i<N; i++){
+	int i = 0;	
+	while(bestSolution[i] != -1){
 		cout << bestSolution[i] << " ";
+		i++;
 	}
 	
-	cout << ") " << sm << endl << endl;;
+	cout << endd << " ) " << sm << endl << endl;
 }
 
 int main(){
